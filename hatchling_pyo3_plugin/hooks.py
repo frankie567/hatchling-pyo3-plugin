@@ -203,7 +203,7 @@ class PyO3BuildHook(BuildHookInterface[Any]):
                         self.app.display_info(
                             f"Copied Rust artifact to source: {dest_file}"
                         )
-                    except Exception as e:
+                    except (OSError, shutil.Error) as e:
                         self.app.display_warning(
                             f"Failed to copy artifact to source: {e}"
                         )

@@ -7,6 +7,16 @@ from unittest.mock import MagicMock, Mock
 from hatchling_pyo3_plugin.hooks import PyO3BuildHook
 
 
+def _get_platform_lib_info() -> tuple[str, str]:
+    """Get platform-specific library extension and suffix for tests."""
+    if platform.system() == "Windows":
+        return ".pyd", ".dll"
+    elif platform.system() == "Darwin":
+        return ".so", ".dylib"
+    else:  # Linux
+        return ".so", ".so"
+
+
 def test_plugin_name():
     assert PyO3BuildHook.PLUGIN_NAME == "pyo3"
 
@@ -121,14 +131,7 @@ def test_copy_to_source():
         package_dir.mkdir(parents=True)
 
         # Create test library file
-        lib_ext = ".so"
-        if platform.system() == "Windows":
-            lib_suffix = ".dll"
-        elif platform.system() == "Darwin":
-            lib_suffix = ".dylib"
-        else:
-            lib_suffix = ".so"
-
+        lib_ext, lib_suffix = _get_platform_lib_info()
         lib_file = target_dir / f"libtest{lib_suffix}"
         lib_file.touch()
 
@@ -167,14 +170,7 @@ def test_copy_to_source_disabled():
         package_dir.mkdir(parents=True)
 
         # Create test library file
-        lib_ext = ".so"
-        if platform.system() == "Windows":
-            lib_suffix = ".dll"
-        elif platform.system() == "Darwin":
-            lib_suffix = ".dylib"
-        else:
-            lib_suffix = ".so"
-
+        lib_ext, lib_suffix = _get_platform_lib_info()
         lib_file = target_dir / f"libtest{lib_suffix}"
         lib_file.touch()
 
