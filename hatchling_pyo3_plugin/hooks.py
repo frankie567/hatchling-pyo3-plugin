@@ -2,6 +2,7 @@
 
 import os
 import platform
+import shutil
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -47,13 +48,25 @@ class PyO3BuildHook(BuildHookInterface[Any]):
         # Find and add the compiled library to the build artifacts
         self._add_rust_artifacts(build_data)
 
+    def _get_profile(self) -> str:
+        """
+        Get the build profile to use.
+
+        Checks environment variable HATCH_BUILD_HOOK_PYO3_PROFILE first,
+        then falls back to config, then defaults to "release".
+        """
+        env_profile = os.environ.get("HATCH_BUILD_HOOK_PYO3_PROFILE")
+        if env_profile:
+            return env_profile
+        return self.config.get("profile", "release")
+
     def _build_rust_extension(self, cargo_toml: Path) -> None:
         """Build the Rust extension using cargo."""
         cargo_dir = cargo_toml.parent
 
         # Get configuration options
         config = self.config
-        profile = config.get("profile", "release")
+        profile = self._get_profile()
         cargo_args = config.get("cargo-args", [])
 
         # Build command
@@ -104,8 +117,9 @@ class PyO3BuildHook(BuildHookInterface[Any]):
         """Find compiled Rust libraries and add them to the wheel."""
         # Get configuration
         config = self.config
-        profile = config.get("profile", "release")
+        profile = self._get_profile()
         target_dir_name = config.get("target-dir", "target")
+        copy_to_source = config.get("copy-to-source", True)
 
         target_dir = Path(self.root) / target_dir_name / profile
 
@@ -178,6 +192,25 @@ class PyO3BuildHook(BuildHookInterface[Any]):
                 build_data["force_include"] = {}
 
             build_data["force_include"][str(lib_file)] = artifact_path
+
+            # Copy to source directory for development
+            if copy_to_source:
+                source_package_dir = Path(self.root) / package_name
+                if source_package_dir.exists() and source_package_dir.is_dir():
+                    dest_file = source_package_dir / target_name
+                    try:
+                        shutil.copy2(lib_file, dest_file)
+                        self.app.display_info(
+                            f"Copied Rust artifact to source: {dest_file}"
+                        )
+                    except (OSError, shutil.Error) as e:
+                        self.app.display_warning(
+                            f"Failed to copy artifact to source: {e}"
+                        )
+                else:
+                    self.app.display_debug(
+                        f"Source package directory not found: {source_package_dir}"
+                    )
 
 
 @hookimpl
