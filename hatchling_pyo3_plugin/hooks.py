@@ -117,29 +117,29 @@ class PyO3BuildHook(BuildHookInterface[Any]):
         if platform.system() == "Windows":
             lib_ext = ".pyd"
             # On Windows, Rust cdylib outputs .dll, which we need to find
-            lib_patterns = ["*.dll", "*.pyd"]
+            lib_suffix = [".dll", ".pyd"]
         elif platform.system() == "Darwin":
             lib_ext = ".so"
             # On macOS, Rust cdylib outputs .dylib
-            lib_patterns = ["*.dylib"]
+            lib_suffix = [".dylib"]
         else:  # Linux
             lib_ext = ".so"
             # On Linux, Rust cdylib outputs .so
-            lib_patterns = ["*.so"]
+            lib_suffix = [".so"]
 
         # Find the compiled library
         # Look for cdylib outputs with various patterns
         found_libs = []
 
         # Try with 'lib' prefix first (standard Rust naming)
-        for pattern in lib_patterns:
-            for lib_file in target_dir.glob(f"lib*{pattern}"):
+        for suffix in lib_suffix:
+            for lib_file in target_dir.glob(f"lib*{suffix}"):
                 if lib_file.is_file() and lib_file not in found_libs:
                     found_libs.append(lib_file)
 
         # Also try without 'lib' prefix (some configurations)
-        for pattern in lib_patterns:
-            for lib_file in target_dir.glob(pattern):
+        for suffix in lib_suffix:
+            for lib_file in target_dir.glob(f"*{suffix}"):
                 if lib_file.is_file() and lib_file not in found_libs:
                     # Skip if it starts with 'lib' (already found above)
                     if not lib_file.stem.startswith("lib"):
