@@ -1,0 +1,64 @@
+site_name: Hatchling PyO3 Plugin
+site_description: A Hatchling build hook plugin for building PyO3 Rust extensions
+
+repo_url: https://github.com/frankie567/hatchling-pyo3-plugin
+repo_name: frankie567/hatchling-pyo3-plugin
+
+theme:
+    name: material
+    icon:
+        logo: material/library
+    palette:
+        # Palette toggle for automatic mode
+        - media: "(prefers-color-scheme)"
+          toggle:
+            icon: material/brightness-auto
+            name: Switch to light mode
+
+        # Palette toggle for light mode
+        - media: "(prefers-color-scheme: light)"
+          scheme: default
+          primary: red
+          accent: red
+          toggle:
+            icon: material/brightness-7
+            name: Switch to dark mode
+
+        # Palette toggle for dark mode
+        - media: "(prefers-color-scheme: dark)"
+          scheme: slate
+          primary: red
+          accent: red
+          toggle:
+            icon: material/brightness-4
+            name: Switch to light mode
+
+markdown_extensions:
+    - toc:
+        permalink: true
+    - pymdownx.highlight:
+        anchor_linenums: true
+    - pymdownx.tasklist:
+        custom_checkbox: true
+    - pymdownx.inlinehilite
+    - pymdownx.snippets
+    - pymdownx.superfences
+
+plugins:
+    - search
+    - mkdocstrings:
+        handlers:
+            python:
+                import:
+                    - https://docs.python.org/3.10/objects.inv
+                options:
+                    docstring_style: google
+
+watch:
+    - docs
+    - hatchling_pyo3_plugin
+
+nav:
+    - About: index.md
+    - Reference:
+        - hatchling_pyo3_plugin: reference/hatchling_pyo3_plugin.md
