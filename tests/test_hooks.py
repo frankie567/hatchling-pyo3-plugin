@@ -39,31 +39,23 @@ def test_add_rust_artifacts_glob_pattern():
 
         # Test that _add_rust_artifacts doesn't raise ValueError
         build_data = {}
-        try:
-            hook._add_rust_artifacts(build_data)
-            # If we get here without exception, the glob patterns are working
-            assert True
-        except ValueError as e:
-            if "Invalid pattern" in str(e):
-                assert False, f"Glob pattern error: {e}"
-            raise
+        # This should not raise ValueError with the fixed glob patterns
+        hook._add_rust_artifacts(build_data)
 
         # Verify that artifacts were found and added
+        assert "force_include" in build_data
         # On Linux, it should find libtest.so
         # On macOS, it should find libfoo.dylib
         # On Windows, it should find libbar.dll
         if platform.system() == "Linux":
-            assert "force_include" in build_data
             assert any(
                 "test.so" in path for path in build_data["force_include"].values()
             )
         elif platform.system() == "Darwin":
-            assert "force_include" in build_data
             assert any(
                 "foo.so" in path for path in build_data["force_include"].values()
             )
         elif platform.system() == "Windows":
-            assert "force_include" in build_data
             assert any(
                 "bar.pyd" in path for path in build_data["force_include"].values()
             )
