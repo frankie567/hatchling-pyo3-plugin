@@ -28,6 +28,8 @@ This is inspired by [setuptools-rust](https://github.com/PyO3/setuptools-rust), 
 - ✅ Automatic detection of Cargo.toml
 - ✅ Cross-platform support (Linux, macOS, Windows)
 - ✅ Configurable build profiles (release/debug)
+- ✅ Environment variable support for dynamic profile selection
+- ✅ Automatic artifact copying to source directory for development
 - ✅ Custom Cargo arguments support
 - ✅ Integration with standard Python packaging workflow
 
@@ -80,7 +82,31 @@ requires-python = ">=3.8"
 # profile = "release"            # Build profile (default: "release", can be "debug")
 # target-dir = "target"          # Cargo target directory (default: "target")
 # cargo-args = ["--features", "special"]  # Additional cargo arguments
+# copy-to-source = true          # Copy built artifacts to source directory (default: true)
 ```
+
+### Development Mode
+
+For faster development iterations, you can:
+
+1. **Use debug profile for faster builds:**
+   ```bash
+   # Set profile via environment variable
+   HATCH_BUILD_HOOK_PYO3_PROFILE=debug hatch build
+   ```
+
+2. **Automatic artifact copying:**
+   By default (`copy-to-source = true`), the plugin copies compiled Rust extensions to your package source directory after building. This allows you to run tests locally without manually copying files:
+   ```bash
+   # Build the wheel (artifacts are automatically copied to source)
+   hatch build
+   
+   # Run tests directly
+   pytest
+   ```
+
+3. **Disable automatic copying:**
+   If you prefer not to have artifacts copied to your source directory, set `copy-to-source = false` in your configuration.
 
 ## Development
 
